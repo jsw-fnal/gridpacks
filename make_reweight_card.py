@@ -25,7 +25,7 @@ def recurse( c_list ):
         return pairs
 
 def getWeightName( reweight ):
-    name = "_".join( [ ("%s_%8.6f"%( reweight[2*i], reweight[2*i+1] )).rstrip('0') for i in range(len(reweight)/2) ] ) 
+    name = "_".join( [ ("%s_%8.6f"%( reweight[2*i], reweight[2*i+1] )).rstrip('0') for i in range(len(reweight)//2) ] ) 
     return name.replace('.','p').replace('-','m')
 
 def make_reweight_card( filename, reweights, referencepoint, order_dict ):
@@ -42,10 +42,10 @@ def make_reweight_card( filename, reweights, referencepoint, order_dict ):
         for reweight in reweights:
             name = getWeightName( reweight )
             out_file.write( "launch --rwgt_name=%s\n"%name )
-            for i in range(len(reweight)/2):
+            for i in range(len(reweight)//2):
                 out_file.write("set %s %8.6f\n"%( reweight[2*i], reweight[2*i+1]))
             out_file.write('\n')
-    print "Written %i weights to file:"%len(reweights), filename 
+    print("Written %i weights to file:"%len(reweights), filename)
 
 def make_reweight_pkl( filename, reweights, referencepoint, order_dict ):
     import pickle
@@ -55,9 +55,9 @@ def make_reweight_pkl( filename, reweights, referencepoint, order_dict ):
         name = getWeightName( reweight )
         #rw_dict[i_reweight] = name 
         rw_dict[name] = i_reweight 
-    pickle.dump({'order':order_dict, 'ref_point':referencepoint, 'rw_dict':rw_dict}, file(pklfilename,'w'))
+    pickle.dump({'order':order_dict, 'ref_point':referencepoint, 'rw_dict':rw_dict}, open(pklfilename,'wb'))
 #    pickle.dump(rw_dict, file(pklfilename,'w')) 
-    print "Written pkl file for enumeration (%i weights):"%len(reweights), pklfilename
+    print("Written pkl file for enumeration (%i weights):"%len(reweights), pklfilename)
 
 def isA( a, type):
     try:
@@ -77,7 +77,7 @@ def ListToDict(referencepointlist):
 
 
 
-print "Coupling arguments: %r" % args.couplings
+print("Coupling arguments: %r" % args.couplings)
 
 # create dict from referencepoint input
 referencepoint = ListToDict(args.referencepoint)
@@ -92,8 +92,10 @@ if len(args.couplings)>0 and isA( args.couplings[0], int ):
     param_points = []
     order = int(args.couplings[0])
     vars      = args.couplings[1:][::2] 
-    stepsize  = map( float, args.couplings[1:][1::2] )
-    assert len(vars)==len(stepsize), "Number of variables and number of stepsizes not the same. Got %i and %i, respectively." %( len(vars), len(stepsize))
+    stepsize  = list(map(float, args.couplings[1:][1::2]))
+    print("%i"%len(vars))
+    print("%i"%len(stepsize))
+    assert len(vars)==len(stepsize), ("Number of variables and number of stepsizes not the same. Got %i and %i, respectively."%( len(vars), len(stepsize)))
     for order_ in range(0, order+1):
         for comb in itertools.combinations_with_replacement(range(len(vars)), order_):
             param_point = tuple()
@@ -135,4 +137,4 @@ if not os.path.exists( args.filename ) or args.overwrite:
     make_reweight_pkl( args.filename, param_points, referencepoint, order_dict )
 
 elif os.path.exists( args.filename ):
-    print "Found",args.filename, "do nothing." 
+    print("Found",args.filename, "do nothing.")
